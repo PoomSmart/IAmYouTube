@@ -1,3 +1,5 @@
+#import <dlfcn.h>
+
 #define YT_BUNDLE_ID @"com.google.ios.youtube"
 #define YT_NAME @"YouTube"
 
@@ -70,7 +72,14 @@
 %hook NSBundle
 
 - (NSString *)bundleIdentifier {
-    return YT_BUNDLE_ID;
+    NSArray *address = [NSThread callStackReturnAddresses];
+    Dl_info info = {0};
+    if (dladdr((void *)[address[2] longLongValue], &info) == 0)
+        return %orig;
+    NSString *path = [NSString stringWithUTF8String:info.dli_fname];
+    if ([path hasPrefix:NSBundle.mainBundle.bundlePath])
+        return YT_BUNDLE_ID;
+    return %orig;
 }
 
 - (id)objectForInfoDictionaryKey:(NSString *)key {
