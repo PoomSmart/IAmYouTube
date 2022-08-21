@@ -59,6 +59,22 @@
 
 %end
 
+%hook APMAEU
+
++ (BOOL)isFAS {
+    return YES;
+}
+
+%end
+
+%hook GULAppEnvironmentUtil
+
++ (BOOL)isFromAppStore {
+    return YES;
+}
+
+%end
+
 %hook SSOConfiguration
 
 - (id)initWithClientID:(id)clientID supportedAccountServices:(id)supportedAccountServices {
