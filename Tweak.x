@@ -99,13 +99,13 @@
     return %orig;
 }
 
-- (NSDictionary *)infoDictionary {
-    NSMutableDictionary *info = [%orig mutableCopy];
-    if (info[@"CFBundleIdentifier"]) info[@"CFBundleIdentifier"] = YT_BUNDLE_ID;
-    if (info[@"CFBundleDisplayName"]) info[@"CFBundleDisplayName"] = YT_NAME;
-    if (info[@"CFBundleName"]) info[@"CFBundleName"] = YT_NAME;
-    return info;
-}
+// - (NSDictionary *)infoDictionary {
+//     NSMutableDictionary *info = [%orig mutableCopy];
+//     if (info[@"CFBundleIdentifier"]) info[@"CFBundleIdentifier"] = YT_BUNDLE_ID;
+//     if (info[@"CFBundleDisplayName"]) info[@"CFBundleDisplayName"] = YT_NAME;
+//     if (info[@"CFBundleName"]) info[@"CFBundleName"] = YT_NAME;
+//     return info;
+// }
 
 - (id)objectForInfoDictionaryKey:(NSString *)key {
     if ([key isEqualToString:@"CFBundleIdentifier"])
