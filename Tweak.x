@@ -86,23 +86,21 @@
 
 %end
 
-BOOL isSelf() {
-    NSArray *address = [NSThread callStackReturnAddresses];
-    Dl_info info = {0};
-    if (dladdr((void *)[address[2] longLongValue], &info) == 0) return NO;
-    NSString *path = [NSString stringWithUTF8String:info.dli_fname];
-    return [path hasPrefix:NSBundle.mainBundle.bundlePath];
-}
-
 %hook NSBundle
 
++ (NSBundle *)bundleWithIdentifier:(NSString *)identifier {
+    if ([identifier isEqualToString:YT_BUNDLE_ID])
+        return NSBundle.mainBundle;
+    return %orig(identifier);
+}
+
 - (NSString *)bundleIdentifier {
-    return isSelf() ? YT_BUNDLE_ID : %orig;
+    return [self isEqual:NSBundle.mainBundle] ? YT_BUNDLE_ID : %orig;
 }
 
 - (NSDictionary *)infoDictionary {
     NSDictionary *dict = %orig;
-    if (!isSelf())
+    if (![self isEqual:NSBundle.mainBundle])
         return %orig;
     NSMutableDictionary *info = [dict mutableCopy];
     if (info[@"CFBundleIdentifier"]) info[@"CFBundleIdentifier"] = YT_BUNDLE_ID;
@@ -112,7 +110,7 @@ BOOL isSelf() {
 }
 
 - (id)objectForInfoDictionaryKey:(NSString *)key {
-    if (!isSelf())
+    if (![self isEqual:NSBundle.mainBundle])
         return %orig;
     if ([key isEqualToString:@"CFBundleIdentifier"])
         return YT_BUNDLE_ID;
