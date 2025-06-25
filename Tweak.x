@@ -75,6 +75,14 @@
 
 %end
 
+%hook SSOClientLogin
+
++ (NSString *)defaultSourceString {
+    return YT_BUNDLE_ID;
+}
+
+%end
+
 %hook SSOConfiguration
 
 - (id)initWithClientID:(id)clientID supportedAccountServices:(id)supportedAccountServices {
