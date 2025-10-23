@@ -94,6 +94,12 @@
 
 %end
 
+%hook YTHotConfig
+
+- (BOOL)clientInfraClientConfigIosEnableFillingEncodedHacksInnertubeContext { return NO; }
+
+%end
+
 %hook NSBundle
 
 + (NSBundle *)bundleWithIdentifier:(NSString *)identifier {
