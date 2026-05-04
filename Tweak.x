@@ -1,3 +1,4 @@
+#import <UIKit/UIKit.h>
 #import <dlfcn.h>
 #import <Foundation/Foundation.h>
 
@@ -6,6 +7,33 @@
 
 @interface SSOConfiguration : NSObject
 @end
+
+static NSString *accessGroupID() {
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecAttrAccount: @"bundleSeedID",
+        (__bridge id)kSecAttrService: @"",
+        (__bridge id)kSecReturnAttributes: @YES
+    };
+
+    CFDictionaryRef result = nil;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query,
+                                          (CFTypeRef *)&result);
+
+    if (status == errSecItemNotFound) {
+        status = SecItemAdd((__bridge CFDictionaryRef)query,
+                            (CFTypeRef *)&result);
+    }
+
+    if (status != errSecSuccess) {
+        return nil;
+    }
+
+    NSString *accessGroup =
+        [(__bridge NSDictionary *)result objectForKey:(__bridge NSString *)kSecAttrAccessGroup];
+
+    return accessGroup;
+}
 
 %hook YTVersionUtils
 
@@ -133,4 +161,39 @@
     return %orig;
 }
 
+%end
+
+%hook SSOKeychainHelper
++ (NSString *)accessGroup {
+    return accessGroupID();
+}
++ (NSString *)sharedAccessGroup {
+    return accessGroupID();
+}
+%end
+
+%hook SSOKeychainCore
++ (NSString *)accessGroup {
+    return accessGroupID();
+}
+
++ (NSString *)sharedAccessGroup {
+    return accessGroupID();
+}
+%end
+
+%hook NSFileManager
+
+- (NSURL *)containerURLForSecurityApplicationGroupIdentifier:(NSString *)groupIdentifier {
+    if (groupIdentifier) {
+        NSArray *paths = [[NSFileManager defaultManager]
+                          URLsForDirectory:NSDocumentDirectory
+                          inDomains:NSUserDomainMask];
+
+        NSURL *documentsURL = paths.lastObject;
+        return [documentsURL URLByAppendingPathComponent:@"AppGroup"];
+    }
+
+    return %orig(groupIdentifier);
+}
 %end
